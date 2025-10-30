@@ -1,0 +1,19 @@
+# Netlify Configuration for Vite React App
+
+[build]
+  # Build command
+  command = "npm run build"
+  
+  # Directory to deploy (Vite outputs to 'dist')
+  publish = "dist"
+
+# Redirect all routes to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Optional: Set environment variables (if needed)
+# [build.environment]
+#   NODE_VERSION = "18"
+
