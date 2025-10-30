@@ -671,13 +671,25 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     }
   };
 
-  const handleMouseDown = () => {
+  // Helper function to get canvas coordinates from event (works for both mouse and touch)
+  const getCanvasCoordinates = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = BOARD_SIZE / rect.width;
+    const scaleY = BOARD_SIZE / rect.height;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
+  const handleStart = () => {
     if (!canShoot || striker || !gameStarted || currentPlayer !== 'white') return;
 
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    // Start charging power when clicking anywhere on the board
+    // Start charging power when clicking/touching anywhere on the board
     setIsCharging(true);
     setPower(0);
 
@@ -687,14 +699,13 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     }, 50);
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!canShoot || striker || currentPlayer !== 'white') return; // Only player controls white
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!canShoot || striker || currentPlayer !== 'white') return;
 
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    const coords = getCanvasCoordinates(clientX, clientY);
+    if (!coords) return;
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = coords;
 
     // Allow moving striker horizontally along baseline when not charging
     let currentStrikerPos = strikerPosition;
@@ -712,7 +723,7 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     setAimAngle(angle);
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     if (!isCharging || !canShoot || currentPlayer !== 'white') return;
 
     if (chargeTimerRef.current) {
@@ -729,6 +740,32 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
 
     // Shoot striker
     shootStriker(strikerPosition, aimAngle, power);
+  };
+
+  // Mouse event handlers
+  const handleMouseDown = () => handleStart();
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleMove(e.clientX, e.clientY);
+  };
+  const handleMouseUp = () => handleEnd();
+
+  // Touch event handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    handleStart();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    handleEnd();
   };
 
   const shootStriker = (position: Vector2D, angle: number, powerPercent: number) => {
@@ -898,12 +935,12 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-100 to-orange-200 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-amber-100 to-orange-200 p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <Card className="mb-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
+        <Card className="mb-2 sm:mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               {/* Back Button */}
               {onBack && (
                 <Button 
@@ -916,19 +953,19 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
                 </Button>
               )}
               <div>
-                <h3 className="font-game text-2xl text-game-primary mb-1">🎯 Carrom Board</h3>
-                <div className="flex gap-4 text-base font-game text-gray-700">
+                <h3 className="font-game text-lg sm:text-2xl text-game-primary mb-1">🎯 Carrom Board</h3>
+                <div className="flex gap-2 sm:gap-4 text-xs sm:text-base font-game text-gray-700">
                   <span className={currentPlayer === 'white' ? 'font-bold text-green-600' : ''}>
                     ⚪ You: {playerScore.white}
                   </span>
                   <span className={currentPlayer === 'black' ? 'font-bold text-blue-600' : ''}>
-                    🤖 Computer: {playerScore.black}
+                    🤖 PC: {playerScore.black}
                   </span>
-                  <span>🎯 Target: {targetScore}</span>
+                  <span>🎯 {targetScore}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {/* Reset Button */}
               <Button 
                 onClick={() => {
@@ -958,14 +995,14 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
               </Button>
               {/* Current Player Indicator */}
               <div className={`
-                font-game text-base font-bold px-4 py-2 rounded-lg
+                font-game text-xs sm:text-base font-bold px-2 sm:px-4 py-1 sm:py-2 rounded-lg
                 ${currentPlayer === 'white' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}
               `}>
-                {currentPlayer === 'white' ? '👤 Your Turn' : '🤖 Computer'}
+                {currentPlayer === 'white' ? '👤 You' : '🤖 PC'}
               </div>
               {/* Timer Display */}
               <div className={`
-                font-game text-2xl font-bold px-6 py-3 rounded-lg
+                font-game text-lg sm:text-2xl font-bold px-3 sm:px-6 py-2 sm:py-3 rounded-lg
                 ${timeRemaining <= 30 ? 'bg-red-100 text-red-600 animate-pulse' : 
                   timeRemaining <= 60 ? 'bg-yellow-100 text-yellow-700' : 
                   'bg-blue-100 text-blue-600'}
@@ -978,7 +1015,7 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-3 text-center font-game text-lg text-purple-600 font-bold"
+              className="mt-2 sm:mt-3 text-center font-game text-sm sm:text-lg text-purple-600 font-bold"
             >
               {message}
             </motion.div>
@@ -986,16 +1023,21 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
         </Card>
 
         {/* Canvas */}
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full px-2">
           <canvas
             ref={canvasRef}
             width={BOARD_SIZE}
             height={BOARD_SIZE}
-            className="border-4 border-amber-800 rounded-lg shadow-2xl bg-white cursor-crosshair"
+            className="border-4 border-amber-800 rounded-lg shadow-2xl bg-white cursor-crosshair max-w-full h-auto touch-none"
+            style={{ width: '100%', maxWidth: `${BOARD_SIZE}px` }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           />
         </div>
 
@@ -1023,22 +1065,21 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
         )}
 
         {/* Instructions */}
-        <Card className="mt-4">
+        <Card className="mt-2 sm:mt-4">
           <div className="text-center font-game">
             {currentPlayer === 'black' ? (
-              <p className="text-base text-blue-600 font-bold">🤖 Computer is playing... Watch the AI in action!</p>
+              <p className="text-sm sm:text-base text-blue-600 font-bold">🤖 Computer is playing... Watch the AI!</p>
             ) : canShoot ? (
-              <div className="space-y-2">
-                <p className="text-lg font-bold text-green-600">👤 Your Turn! Get Ready!</p>
-                <div className="text-sm text-gray-700 space-y-1">
-                  <p>1️⃣ <strong>Move mouse left/right</strong> to position striker</p>
-                  <p>2️⃣ <strong>Move mouse</strong> to aim at white coins ⚪</p>
-                  <p>3️⃣ <strong>Click and hold</strong> to charge power</p>
-                  <p>4️⃣ <strong>Release</strong> to shoot!</p>
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-base sm:text-lg font-bold text-green-600">👤 Your Turn! Get Ready!</p>
+                <div className="text-xs sm:text-sm text-gray-700 space-y-1">
+                  <p>1️⃣ <strong>Touch/Drag</strong> to position & aim striker</p>
+                  <p>2️⃣ <strong>Hold</strong> to charge power</p>
+                  <p>3️⃣ <strong>Release</strong> to shoot!</p>
                 </div>
               </div>
             ) : (
-              <p className="text-base text-orange-600 font-bold">⏳ Wait for pieces to stop moving...</p>
+              <p className="text-sm sm:text-base text-orange-600 font-bold">⏳ Wait for pieces to stop moving...</p>
             )}
           </div>
         </Card>
