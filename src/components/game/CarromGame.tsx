@@ -1045,9 +1045,28 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
           )}
         </Card>
 
+        {/* Canvas */}
+        <div className="flex justify-center w-full px-2">
+          <canvas
+            ref={canvasRef}
+            width={BOARD_SIZE}
+            height={BOARD_SIZE}
+            className="border-4 border-amber-800 rounded-lg shadow-2xl bg-white cursor-crosshair max-w-full h-auto touch-none"
+            style={{ width: '100%', maxWidth: `${BOARD_SIZE}px` }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+          />
+        </div>
+
         {/* Mobile Controls - Arrow Buttons (Only visible on mobile) */}
         {currentPlayer === 'white' && canShoot && !striker && (
-          <div className="block sm:hidden mb-3">
+          <div className="block sm:hidden mt-3">
             <Card>
               <div className="flex items-center justify-center gap-4">
                 <p className="text-sm font-game font-bold text-gray-700">Position Striker:</p>
@@ -1075,25 +1094,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
             </Card>
           </div>
         )}
-
-        {/* Canvas */}
-        <div className="flex justify-center w-full px-2">
-          <canvas
-            ref={canvasRef}
-            width={BOARD_SIZE}
-            height={BOARD_SIZE}
-            className="border-4 border-amber-800 rounded-lg shadow-2xl bg-white cursor-crosshair max-w-full h-auto touch-none"
-            style={{ width: '100%', maxWidth: `${BOARD_SIZE}px` }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-          />
-        </div>
 
         {/* Power meter */}
         {isCharging && (
