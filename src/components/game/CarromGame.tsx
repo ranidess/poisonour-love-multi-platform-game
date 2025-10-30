@@ -708,10 +708,10 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     const { x, y } = coords;
 
     // Allow moving striker horizontally along baseline
-    // On touch devices: allow movement even while charging
-    // On mouse: only allow movement when not charging
+    // On touch devices: DON'T move position (use arrow buttons instead), only aim
+    // On mouse: allow movement when not charging
     let currentStrikerPos = strikerPosition;
-    if (!isCharging || isTouch) {
+    if (!isCharging && !isTouch) {
       const baselineY = BOARD_SIZE - 100;
       const minX = BOARD_PADDING + STRIKER_RADIUS + 20;
       const maxX = BOARD_SIZE - BOARD_PADDING - STRIKER_RADIUS - 20;
@@ -723,6 +723,27 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     // Update aim angle based on current striker position
     const angle = Math.atan2(y - currentStrikerPos.y, x - currentStrikerPos.x);
     setAimAngle(angle);
+  };
+
+  // Move striker left/right using buttons (for mobile)
+  const moveStrikerLeft = () => {
+    if (!canShoot || striker || currentPlayer !== 'white' || isCharging) return;
+    
+    const baselineY = BOARD_SIZE - 100;
+    const minX = BOARD_PADDING + STRIKER_RADIUS + 20;
+    const moveStep = 20; // Move 20px at a time
+    const newX = Math.max(minX, strikerPosition.x - moveStep);
+    setStrikerPosition({ x: newX, y: baselineY });
+  };
+
+  const moveStrikerRight = () => {
+    if (!canShoot || striker || currentPlayer !== 'white' || isCharging) return;
+    
+    const baselineY = BOARD_SIZE - 100;
+    const maxX = BOARD_SIZE - BOARD_PADDING - STRIKER_RADIUS - 20;
+    const moveStep = 20; // Move 20px at a time
+    const newX = Math.min(maxX, strikerPosition.x + moveStep);
+    setStrikerPosition({ x: newX, y: baselineY });
   };
 
   const handleEnd = () => {
@@ -1024,6 +1045,37 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
           )}
         </Card>
 
+        {/* Mobile Controls - Arrow Buttons (Only visible on mobile) */}
+        {currentPlayer === 'white' && canShoot && !striker && (
+          <div className="block sm:hidden mb-3">
+            <Card>
+              <div className="flex items-center justify-center gap-4">
+                <p className="text-sm font-game font-bold text-gray-700">Position Striker:</p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={moveStrikerLeft}
+                    variant="primary"
+                    size="sm"
+                    className="px-6 py-3 text-2xl"
+                    disabled={isCharging}
+                  >
+                    ⬅️
+                  </Button>
+                  <Button
+                    onClick={moveStrikerRight}
+                    variant="primary"
+                    size="sm"
+                    className="px-6 py-3 text-2xl"
+                    disabled={isCharging}
+                  >
+                    ➡️
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
         {/* Canvas */}
         <div className="flex justify-center w-full px-2">
           <canvas
@@ -1075,9 +1127,14 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
               <div className="space-y-1 sm:space-y-2">
                 <p className="text-base sm:text-lg font-bold text-green-600">👤 Your Turn! Get Ready!</p>
                 <div className="text-xs sm:text-sm text-gray-700 space-y-1">
-                  <p>1️⃣ <strong>Touch/Drag</strong> to position & aim striker</p>
-                  <p>2️⃣ <strong>Hold</strong> to charge power</p>
-                  <p>3️⃣ <strong>Release</strong> to shoot!</p>
+                  {/* Mobile instructions */}
+                  <p className="block sm:hidden">1️⃣ Use <strong>⬅️ ➡️ arrows</strong> to position striker</p>
+                  <p className="block sm:hidden">2️⃣ <strong>Touch & drag</strong> on board to aim</p>
+                  <p className="block sm:hidden">3️⃣ <strong>Hold</strong> to charge, <strong>release</strong> to shoot!</p>
+                  {/* Desktop instructions */}
+                  <p className="hidden sm:block">1️⃣ <strong>Move mouse</strong> to position & aim striker</p>
+                  <p className="hidden sm:block">2️⃣ <strong>Click & hold</strong> to charge power</p>
+                  <p className="hidden sm:block">3️⃣ <strong>Release</strong> to shoot!</p>
                 </div>
               </div>
             ) : (
