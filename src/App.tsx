@@ -110,14 +110,7 @@ function App() {
     }
   }, [currentScene, selectedGameId, playMusic]);
 
-  const hasSaveData = Object.keys(platformProgress.games).length > 0;
-
   const handleStartGame = () => {
-    playSFX(SOUND_EFFECTS.CLICK);
-    setCurrentScene('library');
-  };
-
-  const handleContinue = () => {
     playSFX(SOUND_EFFECTS.CLICK);
     setCurrentScene('library');
   };
@@ -277,9 +270,7 @@ function App() {
       case 'home':
         return (
           <HomeScreen
-            hasSaveData={hasSaveData}
             onStartGame={handleStartGame}
-            onContinue={handleContinue}
           />
         );
 
@@ -322,9 +313,7 @@ function App() {
       default:
         return (
           <HomeScreen
-            hasSaveData={hasSaveData}
             onStartGame={handleStartGame}
-            onContinue={handleContinue}
           />
         );
     }

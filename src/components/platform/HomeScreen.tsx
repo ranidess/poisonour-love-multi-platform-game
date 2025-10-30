@@ -11,11 +11,9 @@ import { UserProfile } from '../auth/UserProfile';
 
 interface HomeScreenProps {
   onStartGame: () => void;
-  onContinue: () => void;
-  hasSaveData: boolean;
 }
 
-export const HomeScreen = ({ onStartGame, onContinue, hasSaveData }: HomeScreenProps) => {
+export const HomeScreen = ({ onStartGame }: HomeScreenProps) => {
   const { isAuthenticated, user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
