@@ -205,25 +205,25 @@ function generateCarromLevels(): MiniGameLevel[] {
     if (i <= 10) {
       // Levels 1-10: Easy (low score targets, more time)
       targetScore = 30 + (i - 1) * 5;
-      timeLimit = 180; // 3 minutes
+      timeLimit = 300; // 5 minutes
       difficulty = 'easy';
       title = `Beginner ${i}`;
     } else if (i <= 25) {
       // Levels 11-25: Medium (medium score targets, moderate time)
       targetScore = 80 + (i - 11) * 10;
-      timeLimit = 240; // 4 minutes
+      timeLimit = 360; // 6 minutes
       difficulty = 'medium';
       title = `Intermediate ${i}`;
     } else if (i <= 40) {
       // Levels 26-40: Hard (high score targets, less time)
       targetScore = 220 + (i - 26) * 15;
-      timeLimit = 300; // 5 minutes
+      timeLimit = 420; // 7 minutes
       difficulty = 'hard';
       title = `Advanced ${i}`;
     } else {
       // Levels 41-50: Expert (very high score targets, challenging time)
       targetScore = 440 + (i - 41) * 20;
-      timeLimit = 360; // 6 minutes
+      timeLimit = 480; // 8 minutes
       difficulty = 'expert';
       title = `Master ${i}`;
     }

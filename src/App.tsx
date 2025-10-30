@@ -21,7 +21,7 @@ import {
 } from './data/games.data';
 import { MUSIC_TRACKS, SOUND_EFFECTS, DEFAULT_SETTINGS } from './constants/gameConstants';
 import { GameSettings } from './types/game.types';
-import { PlatformProgress, MiniGameLevel } from './types/platform.types';
+import { PlatformProgress, MiniGameLevel, LevelData } from './types/platform.types';
 import { saveSettings, loadSettings } from './utils/storage.utils';
 
 type AppScene = 
@@ -132,7 +132,30 @@ function App() {
     // All remaining games have levels (no story games)
     if (game.hasLevels) {
       const levels = getMiniGameLevels(gameId);
-      setMiniGameLevels(levels);
+      
+      // Restore progress from saved data
+      const gameProgress = platformProgress.games[gameId];
+      if (gameProgress) {
+        const restoredLevels = levels.map((level, index) => {
+          const isCompleted = gameProgress.completedLevels.includes(level.id);
+          const isUnlocked = index === 0 || gameProgress.completedLevels.includes(levels[index - 1]?.id);
+          
+          // Find saved level data
+          const savedLevelData = gameProgress.levelData?.find((ld: LevelData) => ld.levelId === level.id);
+          
+          return {
+            ...level,
+            unlocked: isUnlocked || level.unlocked,
+            completed: isCompleted,
+            bestScore: savedLevelData?.bestScore || level.bestScore,
+            stars: savedLevelData?.stars || level.stars,
+          };
+        });
+        setMiniGameLevels(restoredLevels);
+      } else {
+        setMiniGameLevels(levels);
+      }
+      
       setCurrentScene('levelSelect');
     }
   };
@@ -160,6 +183,7 @@ function App() {
         totalStars: 0,
         playTime: 0,
         lastPlayed: Date.now(),
+        levelData: [],
       };
 
       // Mark level as completed
@@ -168,6 +192,28 @@ function App() {
       }
       gameProgress.totalScore += score;
       if (stars) gameProgress.totalStars += stars;
+      gameProgress.lastPlayed = Date.now();
+
+      // Save level-specific data (best score, stars)
+      if (!gameProgress.levelData) {
+        gameProgress.levelData = [];
+      }
+      
+      const existingLevelData = gameProgress.levelData.find((ld: LevelData) => ld.levelId === selectedLevelId);
+      if (existingLevelData) {
+        // Update existing level data
+        existingLevelData.bestScore = Math.max(existingLevelData.bestScore || 0, score);
+        existingLevelData.stars = Math.max(existingLevelData.stars || 0, stars || 0);
+        existingLevelData.timesPlayed = (existingLevelData.timesPlayed || 0) + 1;
+      } else {
+        // Add new level data
+        gameProgress.levelData.push({
+          levelId: selectedLevelId,
+          bestScore: score,
+          stars: stars || 0,
+          timesPlayed: 1,
+        });
+      }
 
       // Update level unlock status - ONLY if successful
       const currentIndex = miniGameLevels.findIndex(lv => lv.id === selectedLevelId);
@@ -177,7 +223,7 @@ function App() {
         ));
       }
 
-      // Update best score
+      // Update best score in UI
       setMiniGameLevels(prev => prev.map(lv => 
         lv.id === selectedLevelId 
           ? { ...lv, completed: true, bestScore: Math.max(lv.bestScore, score), stars: Math.max(lv.stars, stars || 0) }

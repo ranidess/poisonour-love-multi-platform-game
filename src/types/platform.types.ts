@@ -50,6 +50,13 @@ export interface MiniGameLevel {
   gameData?: any; // Game-specific data (e.g., pairs for memory game)
 }
 
+export interface LevelData {
+  levelId: string;
+  bestScore: number;
+  stars: number;
+  timesPlayed: number;
+}
+
 export interface GameProgress {
   gameId: string;
   currentChapter?: number;
@@ -60,6 +67,7 @@ export interface GameProgress {
   totalStars: number;
   playTime: number;
   lastPlayed: number;
+  levelData?: LevelData[];
 }
 
 export interface PlatformProgress {
