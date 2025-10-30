@@ -699,7 +699,7 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     }, 50);
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
+  const handleMove = (clientX: number, clientY: number, isTouch: boolean = false) => {
     if (!canShoot || striker || currentPlayer !== 'white') return;
 
     const coords = getCanvasCoordinates(clientX, clientY);
@@ -707,9 +707,11 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
 
     const { x, y } = coords;
 
-    // Allow moving striker horizontally along baseline when not charging
+    // Allow moving striker horizontally along baseline
+    // On touch devices: allow movement even while charging
+    // On mouse: only allow movement when not charging
     let currentStrikerPos = strikerPosition;
-    if (!isCharging) {
+    if (!isCharging || isTouch) {
       const baselineY = BOARD_SIZE - 100;
       const minX = BOARD_PADDING + STRIKER_RADIUS + 20;
       const maxX = BOARD_SIZE - BOARD_PADDING - STRIKER_RADIUS - 20;
@@ -745,7 +747,7 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
   // Mouse event handlers
   const handleMouseDown = () => handleStart();
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    handleMove(e.clientX, e.clientY);
+    handleMove(e.clientX, e.clientY, false);
   };
   const handleMouseUp = () => handleEnd();
 
@@ -759,7 +761,7 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     e.preventDefault();
     if (e.touches.length > 0) {
       const touch = e.touches[0];
-      handleMove(touch.clientX, touch.clientY);
+      handleMove(touch.clientX, touch.clientY, true); // Pass true for touch
     }
   };
 
