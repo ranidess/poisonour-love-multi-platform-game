@@ -26,6 +26,21 @@ export const GAMES: GameInfo[] = [
     estimatedTime: '5-10 min',
   },
   {
+    id: 'carrom_master',
+    title: '🎯 Carrom Master',
+    subtitle: 'Classic Board Game',
+    description: 'Master the traditional Indian board game! Pot your coins with realistic physics and strategic shots.',
+    gameType: 'casual',
+    category: 'minigame',
+    coverImage: '🎯',
+    icon: '🎯',
+    unlockRequirement: 0,
+    isLocked: false,
+    hasChapters: false,
+    hasLevels: true,
+    estimatedTime: '10-15 min',
+  },
+  {
     id: 'heart_puzzle',
     title: '💖 Heart Puzzle',
     subtitle: 'Romantic Sliding Puzzle',
@@ -175,6 +190,69 @@ export const MEMORY_LEVELS: MiniGameLevel[] = generateMemoryLevels();
 
 
 // ============================================
+// MINI GAME: CARROM MASTER
+// ============================================
+
+function generateCarromLevels(): MiniGameLevel[] {
+  const levels: MiniGameLevel[] = [];
+  
+  for (let i = 1; i <= 50; i++) {
+    let targetScore: number;
+    let timeLimit: number;
+    let difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+    let title: string;
+    
+    if (i <= 10) {
+      // Levels 1-10: Easy (low score targets, more time)
+      targetScore = 30 + (i - 1) * 5;
+      timeLimit = 180; // 3 minutes
+      difficulty = 'easy';
+      title = `Beginner ${i}`;
+    } else if (i <= 25) {
+      // Levels 11-25: Medium (medium score targets, moderate time)
+      targetScore = 80 + (i - 11) * 10;
+      timeLimit = 240; // 4 minutes
+      difficulty = 'medium';
+      title = `Intermediate ${i}`;
+    } else if (i <= 40) {
+      // Levels 26-40: Hard (high score targets, less time)
+      targetScore = 220 + (i - 26) * 15;
+      timeLimit = 300; // 5 minutes
+      difficulty = 'hard';
+      title = `Advanced ${i}`;
+    } else {
+      // Levels 41-50: Expert (very high score targets, challenging time)
+      targetScore = 440 + (i - 41) * 20;
+      timeLimit = 360; // 6 minutes
+      difficulty = 'expert';
+      title = `Master ${i}`;
+    }
+    
+    levels.push({
+      id: `carrom_level_${i}`,
+      gameId: 'carrom_master',
+      levelNumber: i,
+      title: title,
+      difficulty,
+      description: `Score ${targetScore} points in ${Math.floor(timeLimit / 60)}:${String(timeLimit % 60).padStart(2, '0')} - ${difficulty.toUpperCase()}`,
+      unlocked: i === 1,
+      completed: false,
+      bestScore: 0,
+      stars: 0,
+      timeLimit,
+      gameData: {
+        targetScore,
+      },
+    });
+  }
+  
+  return levels;
+}
+
+export const CARROM_LEVELS: MiniGameLevel[] = generateCarromLevels();
+
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -192,6 +270,7 @@ export const getStoryChapters = (): StoryChapter[] => {
 
 export const getMiniGameLevels = (gameId: string): MiniGameLevel[] => {
   if (gameId === 'memory_master') return MEMORY_LEVELS;
+  if (gameId === 'carrom_master') return CARROM_LEVELS;
   return [];
 };
 

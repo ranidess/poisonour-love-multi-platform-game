@@ -6,10 +6,12 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useSound } from './hooks/useSound';
+import { useAuth } from './contexts/AuthContext';
 import { HomeScreen } from './components/platform/HomeScreen';
 import { GameLibrary } from './components/platform/GameLibrary';
 import { LevelSelection } from './components/platform/LevelSelection';
 import { MemoryMatchGame } from './components/game/MemoryMatchGame';
+import { CarromGame } from './components/game/CarromGame';
 import { SettingsMenu } from './components/scenes/SettingsMenu';
 import { CreditsScene } from './components/scenes/CreditsScene';
 import {
@@ -31,6 +33,9 @@ type AppScene =
   | 'credits';
 
 function App() {
+  // Auth state
+  const { user } = useAuth();
+  
   // Platform state
   const [currentScene, setCurrentScene] = useState<AppScene>('home');
   const [selectedGameId, setSelectedGameId] = useState<string>('');
@@ -41,7 +46,7 @@ function App() {
     games: {},
     totalPlayTime: 0,
     achievements: [],
-    unlockedGames: ['memory_master'],
+    unlockedGames: ['memory_master', 'carrom_master'],
   });
 
   // Settings
@@ -51,33 +56,45 @@ function App() {
   // Level data
   const [miniGameLevels, setMiniGameLevels] = useState<MiniGameLevel[]>([]);
 
-  // Load saved data on mount
+  // Load saved data on mount and when user changes
   useEffect(() => {
-    const savedSettings = loadSettings();
+    const userEmail = user?.email;
+    const savedSettings = loadSettings(userEmail);
     if (savedSettings) {
       setSettings(savedSettings);
     }
 
-    // Load progress from localStorage
+    // Load progress from localStorage (user-specific)
     try {
-      const saved = localStorage.getItem('platform_progress');
+      const storageKey = userEmail ? `platform_progress_${userEmail}` : 'platform_progress';
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsedProgress = JSON.parse(saved) as PlatformProgress;
         setPlatformProgress(parsedProgress);
+      } else {
+        // Reset to default if no user data found
+        setPlatformProgress({
+          games: {},
+          totalPlayTime: 0,
+          achievements: [],
+          unlockedGames: ['memory_master', 'carrom_master'],
+        });
       }
     } catch (error) {
       console.error('Failed to load progress:', error);
     }
-  }, []);
+  }, [user]);
 
-  // Save progress whenever it changes
+  // Save progress whenever it changes (user-specific)
   useEffect(() => {
     try {
-      localStorage.setItem('platform_progress', JSON.stringify(platformProgress));
+      const userEmail = user?.email;
+      const storageKey = userEmail ? `platform_progress_${userEmail}` : 'platform_progress';
+      localStorage.setItem(storageKey, JSON.stringify(platformProgress));
     } catch (error) {
       console.error('Failed to save progress:', error);
     }
-  }, [platformProgress]);
+  }, [platformProgress, user]);
 
   // Play background music based on scene
   useEffect(() => {
@@ -195,7 +212,8 @@ function App() {
   const handleSettingsUpdate = (newSettings: Partial<GameSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
-    saveSettings(updated);
+    const userEmail = user?.email;
+    saveSettings(updated, userEmail);
   };
 
   const handleResetGame = () => {
@@ -203,7 +221,7 @@ function App() {
       games: {},
       totalPlayTime: 0,
       achievements: [],
-      unlockedGames: ['memory_master'],
+      unlockedGames: ['memory_master', 'carrom_master'],
     });
     setCurrentScene('home');
   };
@@ -287,6 +305,32 @@ function App() {
           pairs={pairs}
           timeLimit={level.timeLimit}
           onComplete={(score) => handleGameComplete(score, Math.floor(score / 300))}
+          onBack={() => {
+            playSFX(SOUND_EFFECTS.CLICK);
+            setCurrentScene('levelSelect');
+          }}
+        />
+      );
+    }
+
+    // Carrom game
+    if (game.gameType === 'casual' && selectedLevelId) {
+      const level = miniGameLevels.find(lv => lv.id === selectedLevelId);
+      if (!level) return <div>Level not found</div>;
+
+      // Get target score from level gameData
+      const targetScore = level.gameData?.targetScore || 50;
+
+      return (
+        <CarromGame
+          targetScore={targetScore}
+          timeLimit={level.timeLimit}
+          difficulty={level.difficulty}
+          onComplete={(score, stars) => handleGameComplete(score, stars)}
+          onBack={() => {
+            playSFX(SOUND_EFFECTS.CLICK);
+            setCurrentScene('levelSelect');
+          }}
         />
       );
     }

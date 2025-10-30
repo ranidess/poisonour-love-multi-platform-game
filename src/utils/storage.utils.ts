@@ -1,23 +1,33 @@
 /**
  * LocalStorage Utilities
  * Handles saving and loading game state
+ * Now supports per-user data storage based on email
  */
 
 import { GameState, GameProgress, GameSettings } from '../types/game.types';
 import { STORAGE_KEYS, DEFAULT_SETTINGS, DEFAULT_PROGRESS } from '../constants/gameConstants';
 
+// Get storage key with user prefix if logged in
+const getUserKey = (baseKey: string, userEmail?: string | null): string => {
+  if (userEmail) {
+    return `${baseKey}_${userEmail}`;
+  }
+  return baseKey;
+};
+
 export const StorageUtils = {
   /**
    * Save complete game state to localStorage
    */
-  saveGameState(state: GameState): boolean {
+  saveGameState(state: GameState, userEmail?: string | null): boolean {
     try {
       const stateWithTimestamp = {
         ...state,
         lastSaved: new Date().toISOString(),
       };
+      const key = getUserKey(STORAGE_KEYS.GAME_STATE, userEmail);
       localStorage.setItem(
-        STORAGE_KEYS.GAME_STATE,
+        key,
         JSON.stringify(stateWithTimestamp)
       );
       return true;
@@ -30,9 +40,10 @@ export const StorageUtils = {
   /**
    * Load complete game state from localStorage
    */
-  loadGameState(): GameState | null {
+  loadGameState(userEmail?: string | null): GameState | null {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.GAME_STATE);
+      const key = getUserKey(STORAGE_KEYS.GAME_STATE, userEmail);
+      const saved = localStorage.getItem(key);
       if (!saved) return null;
       return JSON.parse(saved) as GameState;
     } catch (error) {
@@ -44,10 +55,11 @@ export const StorageUtils = {
   /**
    * Save only progress data
    */
-  saveProgress(progress: GameProgress): boolean {
+  saveProgress(progress: GameProgress, userEmail?: string | null): boolean {
     try {
+      const key = getUserKey(STORAGE_KEYS.PROGRESS, userEmail);
       localStorage.setItem(
-        STORAGE_KEYS.PROGRESS,
+        key,
         JSON.stringify(progress)
       );
       return true;
@@ -60,9 +72,10 @@ export const StorageUtils = {
   /**
    * Load progress data
    */
-  loadProgress(): GameProgress | null {
+  loadProgress(userEmail?: string | null): GameProgress | null {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PROGRESS);
+      const key = getUserKey(STORAGE_KEYS.PROGRESS, userEmail);
+      const saved = localStorage.getItem(key);
       if (!saved) return null;
       return JSON.parse(saved) as GameProgress;
     } catch (error) {
@@ -74,10 +87,11 @@ export const StorageUtils = {
   /**
    * Save settings
    */
-  saveSettings(settings: GameSettings): boolean {
+  saveSettings(settings: GameSettings, userEmail?: string | null): boolean {
     try {
+      const key = getUserKey(STORAGE_KEYS.SETTINGS, userEmail);
       localStorage.setItem(
-        STORAGE_KEYS.SETTINGS,
+        key,
         JSON.stringify(settings)
       );
       return true;
@@ -90,9 +104,10 @@ export const StorageUtils = {
   /**
    * Load settings
    */
-  loadSettings(): GameSettings {
+  loadSettings(userEmail?: string | null): GameSettings {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      const key = getUserKey(STORAGE_KEYS.SETTINGS, userEmail);
+      const saved = localStorage.getItem(key);
       if (!saved) return DEFAULT_SETTINGS;
       return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
     } catch (error) {
@@ -104,16 +119,18 @@ export const StorageUtils = {
   /**
    * Check if save data exists
    */
-  hasSaveData(): boolean {
-    return localStorage.getItem(STORAGE_KEYS.GAME_STATE) !== null;
+  hasSaveData(userEmail?: string | null): boolean {
+    const key = getUserKey(STORAGE_KEYS.GAME_STATE, userEmail);
+    return localStorage.getItem(key) !== null;
   },
 
   /**
    * Clear all save data
    */
-  clearAllData(): void {
+  clearAllData(userEmail?: string | null): void {
     Object.values(STORAGE_KEYS).forEach((key) => {
-      localStorage.removeItem(key);
+      const userKey = getUserKey(key, userEmail);
+      localStorage.removeItem(userKey);
     });
   },
 

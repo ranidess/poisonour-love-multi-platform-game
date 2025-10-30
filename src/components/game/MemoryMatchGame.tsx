@@ -21,9 +21,10 @@ interface MemoryMatchGameProps {
   pairs: Array<{ id: string; emoji: string; name: string }>;
   timeLimit: number;
   onComplete: (score: number, stars: number) => void;
+  onBack?: () => void;
 }
 
-export const MemoryMatchGame = ({ pairs, timeLimit, onComplete }: MemoryMatchGameProps) => {
+export const MemoryMatchGame = ({ pairs, timeLimit, onComplete, onBack }: MemoryMatchGameProps) => {
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedCards, setFlippedCards] = useState<string[]>([]);
   const [matches, setMatches] = useState(0);
@@ -246,11 +247,24 @@ export const MemoryMatchGame = ({ pairs, timeLimit, onComplete }: MemoryMatchGam
         {/* Header */}
         <Card className="mb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="font-game text-2xl text-game-primary mb-1">🧠 Memory Match</h3>
-              <div className="flex gap-4 text-base font-game text-gray-700">
-                <span>💯 Matches: {matches}/{pairs.length}</span>
-                <span>🎯 Moves: {moves}</span>
+            <div className="flex items-center gap-4">
+              {/* Back Button */}
+              {onBack && (
+                <Button 
+                  onClick={onBack} 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  ← Back
+                </Button>
+              )}
+              <div>
+                <h3 className="font-game text-2xl text-game-primary mb-1">🧠 Memory Match</h3>
+                <div className="flex gap-4 text-base font-game text-gray-700">
+                  <span>💯 Matches: {matches}/{pairs.length}</span>
+                  <span>🎯 Moves: {moves}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">

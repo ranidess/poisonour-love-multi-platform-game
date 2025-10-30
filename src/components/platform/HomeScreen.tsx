@@ -4,6 +4,10 @@
  */
 
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginButton } from '../auth/LoginButton';
+import { UserProfile } from '../auth/UserProfile';
 
 interface HomeScreenProps {
   onStartGame: () => void;
@@ -12,8 +16,66 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen = ({ onStartGame, onContinue, hasSaveData }: HomeScreenProps) => {
+  const { isAuthenticated, user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleStartGame = () => {
+    if (isAuthenticated) {
+      onStartGame();
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
   return (
     <div className="h-screen bg-gradient-to-br from-pink-400 via-purple-400 to-pink-500 flex items-center justify-center p-2 md:p-4 overflow-hidden relative">
+      {/* User Profile - Top Right */}
+      {isAuthenticated && (
+        <div className="absolute top-4 right-4 z-20">
+          <UserProfile />
+        </div>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && !isAuthenticated && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowLoginModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="text-5xl mb-4">💖</div>
+              <h2 className="text-2xl font-game text-game-primary mb-2">Welcome Back!</h2>
+              <p className="text-gray-600 font-game">
+                Sign in with Google to save your game progress
+              </p>
+            </div>
+            
+            <LoginButton onSuccess={() => {
+              setShowLoginModal(false);
+              setTimeout(() => onStartGame(), 300);
+            }} />
+            
+            <button
+              onClick={() => {
+                setShowLoginModal(false);
+                onStartGame();
+              }}
+              className="w-full mt-4 text-gray-600 hover:text-gray-800 font-game text-sm underline"
+            >
+              Continue without signing in
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Animated background hearts */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(8)].map((_, i) => (
@@ -141,12 +203,12 @@ export const HomeScreen = ({ onStartGame, onContinue, hasSaveData }: HomeScreenP
           className="space-y-3 md:space-y-4 max-w-md mx-auto"
         >
           <button
-            onClick={onStartGame}
+            onClick={handleStartGame}
             className="w-full bg-white text-pink-600 hover:bg-pink-50 shadow-2xl transform hover:scale-105 transition-all duration-200 font-bold text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 rounded-lg font-game"
           >
             <span className="flex items-center justify-center gap-2 md:gap-3">
               <span className="text-xl md:text-2xl">💕</span>
-              <span>Start Playing</span>
+              <span>{isAuthenticated ? `Play, ${user?.name?.split(' ')[0]}!` : 'Start Playing'}</span>
               <span className="text-xl md:text-2xl">💕</span>
             </span>
           </button>
@@ -162,26 +224,14 @@ export const HomeScreen = ({ onStartGame, onContinue, hasSaveData }: HomeScreenP
               </span>
             </button>
           )}
-        </motion.div>
 
-        {/* Features badges */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="flex flex-wrap justify-center gap-2 mt-6 md:mt-8 mb-4 md:mb-6"
-        >
-          {['GL Romance', 'Visual Novel', 'Mini Games', 'Multiple Endings'].map((tag, i) => (
-            <motion.span
-              key={tag}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 1.5 + i * 0.1 }}
-              className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-white font-game text-xs border border-white/30"
-            >
-              {tag}
-            </motion.span>
-          ))}
+          {!isAuthenticated && (
+            <div className="text-center pt-2">
+              <p className="text-white/90 font-game text-sm mb-3">
+                💡 Sign in to save your progress across devices
+              </p>
+            </div>
+          )}
         </motion.div>
 
         {/* Footer */}
@@ -192,9 +242,22 @@ export const HomeScreen = ({ onStartGame, onContinue, hasSaveData }: HomeScreenP
           className="text-white/70 text-xs md:text-sm font-game"
         >
           <p className="text-sm md:text-base">💖 Made with Love 💖</p>
-          <p className="text-xs text-white/50 hidden md:block">
+          <p className="text-xs text-white/50 hidden md:block mb-2">
             Because every heart deserves a beautiful love story
           </p>
+          
+          {/* Copyright Information */}
+          <div className="mt-4 pt-4 border-t border-white/20">
+            <p className="text-xs md:text-sm text-white/80 font-semibold">
+              Akanksha Gauns Dessai
+            </p>
+            <p className="text-xs text-white/60 mt-1">
+              Lisha Tech
+            </p>
+            <p className="text-xs text-white/50 mt-1">
+              © {new Date().getFullYear()} All rights reserved
+            </p>
+          </div>
         </motion.div>
 
         {/* Side decorative hearts - desktop only */}
