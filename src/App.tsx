@@ -13,6 +13,7 @@ import { LevelSelection } from './components/platform/LevelSelection';
 import { MemoryMatchGame } from './components/game/MemoryMatchGame';
 import { CarromGame } from './components/game/CarromGame';
 import { SnakeGame } from './components/game/SnakeGame';
+import { AntSmasherGame } from './components/game/AntSmasherGame';
 import { SettingsMenu } from './components/scenes/SettingsMenu';
 import { CreditsScene } from './components/scenes/CreditsScene';
 import {
@@ -47,7 +48,7 @@ function App() {
     games: {},
     totalPlayTime: 0,
     achievements: [],
-    unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
+    unlockedGames: ['memory_master', 'carrom_master', 'snake_master', 'ant_smasher'],
   });
 
   // Settings
@@ -71,14 +72,22 @@ function App() {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsedProgress = JSON.parse(saved) as PlatformProgress;
-        setPlatformProgress(parsedProgress);
+        
+        // Migration: Add new games to unlocked list if they're missing
+        const defaultUnlockedGames = ['memory_master', 'carrom_master', 'snake_master', 'ant_smasher'];
+        const updatedUnlockedGames = [...new Set([...parsedProgress.unlockedGames, ...defaultUnlockedGames])];
+        
+        setPlatformProgress({
+          ...parsedProgress,
+          unlockedGames: updatedUnlockedGames,
+        });
       } else {
         // Reset to default if no user data found
         setPlatformProgress({
           games: {},
           totalPlayTime: 0,
           achievements: [],
-          unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
+          unlockedGames: ['memory_master', 'carrom_master', 'snake_master', 'ant_smasher'],
         });
       }
     } catch (error) {
@@ -261,7 +270,7 @@ function App() {
       games: {},
       totalPlayTime: 0,
       achievements: [],
-      unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
+      unlockedGames: ['memory_master', 'carrom_master', 'snake_master', 'ant_smasher'],
     });
     setCurrentScene('home');
   };
@@ -372,7 +381,7 @@ function App() {
     }
 
     // Snake game
-    if (game.gameType === 'arcade' && selectedLevelId) {
+    if (game.gameType === 'arcade' && game.id === 'snake_master' && selectedLevelId) {
       const level = miniGameLevels.find(lv => lv.id === selectedLevelId);
       if (!level) return <div>Level not found</div>;
 
@@ -384,6 +393,32 @@ function App() {
         <SnakeGame
           foodTarget={foodTarget}
           speed={speed}
+          difficulty={level.difficulty}
+          onComplete={(score, stars) => handleGameComplete(score, stars)}
+          onBack={() => {
+            playSFX(SOUND_EFFECTS.CLICK);
+            setCurrentScene('levelSelect');
+          }}
+        />
+      );
+    }
+
+    // Ant Smasher game
+    if (game.gameType === 'arcade' && game.id === 'ant_smasher' && selectedLevelId) {
+      const level = miniGameLevels.find(lv => lv.id === selectedLevelId);
+      if (!level) return <div>Level not found</div>;
+
+      // Get game data from level
+      const antsToSmash = level.gameData?.antsToSmash || 20;
+      const antSpeed = level.gameData?.antSpeed || 1.5;
+      const spawnRate = level.gameData?.spawnRate || 1500;
+
+      return (
+        <AntSmasherGame
+          antsToSmash={antsToSmash}
+          timeLimit={level.timeLimit}
+          antSpeed={antSpeed}
+          spawnRate={spawnRate}
           difficulty={level.difficulty}
           onComplete={(score, stars) => handleGameComplete(score, stars)}
           onBack={() => {

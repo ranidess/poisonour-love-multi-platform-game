@@ -29,7 +29,7 @@ export const GAMES: GameInfo[] = [
     id: 'carrom_master',
     title: '🎯 Carrom Master',
     subtitle: 'Classic Board Game',
-    description: 'Master the traditional Indian board game! Pot your coins with realistic physics and strategic shots.',
+    description: 'Master the traditional Indian board game! 100 challenging levels with realistic physics and strategic shots.',
     gameType: 'casual',
     category: 'minigame',
     coverImage: '🎯',
@@ -44,7 +44,7 @@ export const GAMES: GameInfo[] = [
     id: 'snake_master',
     title: '🐍 Snake Master',
     subtitle: 'Classic Arcade Game',
-    description: 'Guide the snake to eat food and grow longer! Control with mouse or arrows. Avoid hitting walls and yourself!',
+    description: 'Guide the snake to eat food and grow longer! 100 levels from beginner to insanely fast expert challenges!',
     gameType: 'arcade',
     category: 'minigame',
     coverImage: '🐍',
@@ -54,6 +54,21 @@ export const GAMES: GameInfo[] = [
     hasChapters: false,
     hasLevels: true,
     estimatedTime: '5-10 min',
+  },
+  {
+    id: 'ant_smasher',
+    title: '🐜 Ant Smasher',
+    subtitle: 'Fast Reaction Game',
+    description: 'Smash the invading ants! 100 levels with increasing speed. Avoid bombs and build combos for high scores!',
+    gameType: 'arcade',
+    category: 'minigame',
+    coverImage: '🐜',
+    icon: '🐜',
+    unlockRequirement: 0,
+    isLocked: false,
+    hasChapters: false,
+    hasLevels: true,
+    estimatedTime: '3-5 min',
   },
   {
     id: 'heart_puzzle',
@@ -211,34 +226,34 @@ export const MEMORY_LEVELS: MiniGameLevel[] = generateMemoryLevels();
 function generateCarromLevels(): MiniGameLevel[] {
   const levels: MiniGameLevel[] = [];
   
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= 100; i++) {
     let targetScore: number;
     let timeLimit: number;
     let difficulty: 'easy' | 'medium' | 'hard' | 'expert';
     let title: string;
     
-    if (i <= 10) {
-      // Levels 1-10: Easy (low score targets, more time)
+    if (i <= 15) {
+      // Levels 1-15: Easy (low score targets)
       targetScore = 30 + (i - 1) * 5;
-      timeLimit = 300; // 5 minutes
+      timeLimit = 300;
       difficulty = 'easy';
       title = `Beginner ${i}`;
-    } else if (i <= 25) {
-      // Levels 11-25: Medium (medium score targets, moderate time)
-      targetScore = 80 + (i - 11) * 10;
-      timeLimit = 360; // 6 minutes
+    } else if (i <= 40) {
+      // Levels 16-40: Medium (medium score targets)
+      targetScore = 105 + (i - 16) * 8;
+      timeLimit = 360;
       difficulty = 'medium';
       title = `Intermediate ${i}`;
-    } else if (i <= 40) {
-      // Levels 26-40: Hard (high score targets, less time)
-      targetScore = 220 + (i - 26) * 15;
-      timeLimit = 420; // 7 minutes
+    } else if (i <= 70) {
+      // Levels 41-70: Hard (high score targets)
+      targetScore = 305 + (i - 41) * 12;
+      timeLimit = 420;
       difficulty = 'hard';
       title = `Advanced ${i}`;
     } else {
-      // Levels 41-50: Expert (very high score targets, challenging time)
-      targetScore = 440 + (i - 41) * 20;
-      timeLimit = 480; // 8 minutes
+      // Levels 71-100: Expert (very high score targets)
+      targetScore = 665 + (i - 71) * 15;
+      timeLimit = 480;
       difficulty = 'expert';
       title = `Master ${i}`;
     }
@@ -274,34 +289,34 @@ export const CARROM_LEVELS: MiniGameLevel[] = generateCarromLevels();
 function generateSnakeLevels(): MiniGameLevel[] {
   const levels: MiniGameLevel[] = [];
   
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 100; i++) {
     let foodTarget: number;
     let speed: number;
     let difficulty: 'easy' | 'medium' | 'hard' | 'expert';
     let title: string;
     
-    if (i <= 8) {
-      // Levels 1-8: Easy (low food targets, slower speed)
+    if (i <= 15) {
+      // Levels 1-15: Easy (low food targets, slower speed)
       foodTarget = 5 + i;
-      speed = 150 - (i - 1) * 5; // 150ms to 115ms
+      speed = 150 - (i - 1) * 3; // 150ms to 108ms
       difficulty = 'easy';
       title = `Beginner ${i}`;
-    } else if (i <= 16) {
-      // Levels 9-16: Medium (medium food targets, moderate speed)
-      foodTarget = 13 + (i - 8);
-      speed = 115 - (i - 9) * 5; // 115ms to 80ms
+    } else if (i <= 40) {
+      // Levels 16-40: Medium (medium food targets, moderate speed)
+      foodTarget = 20 + (i - 15);
+      speed = 105 - Math.floor((i - 16) * 1.2); // 105ms to 75ms
       difficulty = 'medium';
       title = `Intermediate ${i}`;
-    } else if (i <= 24) {
-      // Levels 17-24: Hard (high food targets, faster speed)
-      foodTarget = 21 + (i - 16);
-      speed = 80 - (i - 17) * 3; // 80ms to 56ms
+    } else if (i <= 70) {
+      // Levels 41-70: Hard (high food targets, faster speed)
+      foodTarget = 45 + (i - 40);
+      speed = 75 - Math.floor((i - 41) * 0.8); // 75ms to 51ms
       difficulty = 'hard';
       title = `Advanced ${i}`;
     } else {
-      // Levels 25-30: Expert (very high food targets, very fast)
-      foodTarget = 29 + (i - 24) * 2;
-      speed = 55 - (i - 25) * 2; // 55ms to 45ms
+      // Levels 71-100: Expert (very high food targets, very fast)
+      foodTarget = 75 + (i - 70) * 2;
+      speed = Math.max(30, 50 - (i - 71)); // 50ms to 30ms (minimum 30ms)
       difficulty = 'expert';
       title = `Master ${i}`;
     }
@@ -332,6 +347,81 @@ export const SNAKE_LEVELS: MiniGameLevel[] = generateSnakeLevels();
 
 
 // ============================================
+// MINI GAME: ANT SMASHER
+// ============================================
+
+function generateAntSmasherLevels(): MiniGameLevel[] {
+  const levels: MiniGameLevel[] = [];
+  
+  for (let i = 1; i <= 100; i++) {
+    let antsToSmash: number;
+    let timeLimit: number;
+    let antSpeed: number;
+    let spawnRate: number;
+    let difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+    let title: string;
+    
+    if (i <= 15) {
+      // Levels 1-15: Easy (few ants, slow speed, more time)
+      antsToSmash = 10 + (i - 1) * 2;
+      timeLimit = 60;
+      antSpeed = 1.0 + (i - 1) * 0.08;
+      spawnRate = 2000 - (i - 1) * 80; // 2000ms to 880ms
+      difficulty = 'easy';
+      title = `Beginner ${i}`;
+    } else if (i <= 40) {
+      // Levels 16-40: Medium (more ants, faster, less time)
+      antsToSmash = 38 + (i - 16) * 2;
+      timeLimit = 55 - Math.floor((i - 16) / 5); // 55s to 50s
+      antSpeed = 1.8 + (i - 16) * 0.06;
+      spawnRate = 850 - (i - 16) * 15; // 850ms to 475ms
+      difficulty = 'medium';
+      title = `Intermediate ${i}`;
+    } else if (i <= 70) {
+      // Levels 41-70: Hard (many ants, very fast)
+      antsToSmash = 88 + (i - 41) * 2;
+      timeLimit = 50 - Math.floor((i - 41) / 6); // 50s to 45s
+      antSpeed = 3.3 + (i - 41) * 0.05;
+      spawnRate = 450 - (i - 41) * 8; // 450ms to 210ms
+      difficulty = 'hard';
+      title = `Advanced ${i}`;
+    } else {
+      // Levels 71-100: Expert (insane ants, extreme speed)
+      antsToSmash = 148 + (i - 71) * 3;
+      timeLimit = 45 - Math.floor((i - 71) / 10); // 45s to 42s
+      antSpeed = 4.8 + (i - 71) * 0.07;
+      spawnRate = Math.max(100, 200 - (i - 71) * 3); // 200ms to 100ms (minimum 100ms)
+      difficulty = 'expert';
+      title = `Master ${i}`;
+    }
+    
+    levels.push({
+      id: `ant_level_${i}`,
+      gameId: 'ant_smasher',
+      levelNumber: i,
+      title: title,
+      difficulty,
+      description: `Smash ${antsToSmash} ants in ${timeLimit}s - ${difficulty.toUpperCase()}`,
+      unlocked: i === 1,
+      completed: false,
+      bestScore: 0,
+      stars: 0,
+      timeLimit,
+      gameData: {
+        antsToSmash,
+        antSpeed,
+        spawnRate,
+      },
+    });
+  }
+  
+  return levels;
+}
+
+export const ANT_SMASHER_LEVELS: MiniGameLevel[] = generateAntSmasherLevels();
+
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -351,6 +441,7 @@ export const getMiniGameLevels = (gameId: string): MiniGameLevel[] => {
   if (gameId === 'memory_master') return MEMORY_LEVELS;
   if (gameId === 'carrom_master') return CARROM_LEVELS;
   if (gameId === 'snake_master') return SNAKE_LEVELS;
+  if (gameId === 'ant_smasher') return ANT_SMASHER_LEVELS;
   return [];
 };
 
