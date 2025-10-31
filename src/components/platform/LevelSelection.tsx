@@ -86,9 +86,12 @@ export const LevelSelection = ({
                       <span className={`px-3 py-1 rounded-full text-xs font-game border-2 ${getDifficultyColor(level.difficulty)}`}>
                         {level.difficulty.toUpperCase()}
                       </span>
-                      <span className="px-3 py-1 rounded-full text-xs font-game bg-blue-100 text-blue-700 border-2 border-blue-300">
-                        ⏱️ {level.timeLimit}s
-                      </span>
+                      {/* Show time limit only for non-Carrom games */}
+                      {level.gameId !== 'carrom_master' && (
+                        <span className="px-3 py-1 rounded-full text-xs font-game bg-blue-100 text-blue-700 border-2 border-blue-300">
+                          ⏱️ {level.timeLimit}s
+                        </span>
+                      )}
                     </div>
 
                     {/* Best Score */}

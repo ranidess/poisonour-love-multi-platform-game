@@ -234,7 +234,7 @@ function generateCarromLevels(): MiniGameLevel[] {
       levelNumber: i,
       title: title,
       difficulty,
-      description: `Score ${targetScore} points in ${Math.floor(timeLimit / 60)}:${String(timeLimit % 60).padStart(2, '0')} - ${difficulty.toUpperCase()}`,
+      description: `Score ${targetScore} points - ${difficulty.toUpperCase()}`,
       unlocked: i === 1,
       completed: false,
       bestScore: 0,

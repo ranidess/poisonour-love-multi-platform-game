@@ -50,12 +50,11 @@ const MIN_VELOCITY = 0.1;
 const MAX_STRIKER_POWER = 25;
 const RESTITUTION = 0.85; // Bounciness
 
-export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onBack }: CarromGameProps) => {
+export const CarromGame = ({ targetScore, difficulty, onComplete, onBack }: CarromGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [striker, setStriker] = useState<Piece | null>(null);
@@ -131,23 +130,33 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Timer countdown
+  // Timer countdown - DISABLED (no time limit)
+  // useEffect(() => {
+  //   if (!gameStarted || gameOver) return;
+
+  //   const interval = setInterval(() => {
+  //     setTimeRemaining((prev) => {
+  //       if (prev <= 1) {
+  //         clearInterval(interval);
+  //         endGame(false);
+  //         return 0;
+  //       }
+  //       return prev - 1;
+  //     });
+  //   }, 1000);
+
+  //   return () => clearInterval(interval);
+  // }, [gameStarted, gameOver]);
+
+  // Check win condition when score changes
   useEffect(() => {
     if (!gameStarted || gameOver) return;
-
-    const interval = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          endGame(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [gameStarted, gameOver]);
+    
+    // Check if player reached target score
+    if (playerScore.white >= targetScore) {
+      endGame(true);
+    }
+  }, [playerScore, gameStarted, gameOver, targetScore]);
 
   // Physics loop
   useEffect(() => {
@@ -857,12 +866,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
     setTimeout(() => onComplete(score, stars), 2000);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   // Start screen
   if (!gameStarted) {
     return (
@@ -885,7 +888,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
                 <li>• Red Queen = 50 points, Color coins = 10 points each</li>
                 <li>• Don't pocket the striker or opponent's pieces (Foul!)</li>
                 <li>• Reach {targetScore} points to win!</li>
-                <li>• ⏱️ Time Limit: {formatTime(timeLimit)}</li>
                 <li>• 🎯 Difficulty: {difficulty.toUpperCase()}</li>
               </ul>
             </div>
@@ -925,7 +927,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
                   You won the carrom match!
                 </p>
                 <div className="bg-green-50 rounded-lg p-4 mb-4">
-                  <p className="font-game text-lg">⏱️ Time: {formatTime(timeRemaining)} left</p>
                   <p className="font-game text-lg">🎯 Score: {playerScore.white} points</p>
                   <p className="font-game text-lg">🎲 Turns: {turn}</p>
                   <p className="font-game text-lg">⚠️ Fouls: {fouls}</p>
@@ -1000,7 +1001,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
                   setPieces([]);
                   setStriker(null);
                   setPlayerScore({ white: 0, black: 0 });
-                  setTimeRemaining(timeLimit);
                   setTurn(1);
                   setCurrentPlayer('white');
                   setFouls(0);
@@ -1022,15 +1022,6 @@ export const CarromGame = ({ targetScore, timeLimit, difficulty, onComplete, onB
                 ${currentPlayer === 'white' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}
               `}>
                 {currentPlayer === 'white' ? '👤 You' : '🤖 PC'}
-              </div>
-              {/* Timer Display */}
-              <div className={`
-                font-game text-lg sm:text-2xl font-bold px-3 sm:px-6 py-2 sm:py-3 rounded-lg
-                ${timeRemaining <= 30 ? 'bg-red-100 text-red-600 animate-pulse' : 
-                  timeRemaining <= 60 ? 'bg-yellow-100 text-yellow-700' : 
-                  'bg-blue-100 text-blue-600'}
-              `}>
-                ⏱️ {formatTime(timeRemaining)}
               </div>
             </div>
           </div>
