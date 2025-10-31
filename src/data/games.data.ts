@@ -41,6 +41,21 @@ export const GAMES: GameInfo[] = [
     estimatedTime: '10-15 min',
   },
   {
+    id: 'snake_master',
+    title: '🐍 Snake Master',
+    subtitle: 'Classic Arcade Game',
+    description: 'Guide the snake to eat food and grow longer! Control with mouse or arrows. Avoid hitting walls and yourself!',
+    gameType: 'arcade',
+    category: 'minigame',
+    coverImage: '🐍',
+    icon: '🐍',
+    unlockRequirement: 0,
+    isLocked: false,
+    hasChapters: false,
+    hasLevels: true,
+    estimatedTime: '5-10 min',
+  },
+  {
     id: 'heart_puzzle',
     title: '💖 Heart Puzzle',
     subtitle: 'Romantic Sliding Puzzle',
@@ -253,6 +268,70 @@ export const CARROM_LEVELS: MiniGameLevel[] = generateCarromLevels();
 
 
 // ============================================
+// MINI GAME: SNAKE MASTER
+// ============================================
+
+function generateSnakeLevels(): MiniGameLevel[] {
+  const levels: MiniGameLevel[] = [];
+  
+  for (let i = 1; i <= 30; i++) {
+    let foodTarget: number;
+    let speed: number;
+    let difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+    let title: string;
+    
+    if (i <= 8) {
+      // Levels 1-8: Easy (low food targets, slower speed)
+      foodTarget = 5 + i;
+      speed = 150 - (i - 1) * 5; // 150ms to 115ms
+      difficulty = 'easy';
+      title = `Beginner ${i}`;
+    } else if (i <= 16) {
+      // Levels 9-16: Medium (medium food targets, moderate speed)
+      foodTarget = 13 + (i - 8);
+      speed = 115 - (i - 9) * 5; // 115ms to 80ms
+      difficulty = 'medium';
+      title = `Intermediate ${i}`;
+    } else if (i <= 24) {
+      // Levels 17-24: Hard (high food targets, faster speed)
+      foodTarget = 21 + (i - 16);
+      speed = 80 - (i - 17) * 3; // 80ms to 56ms
+      difficulty = 'hard';
+      title = `Advanced ${i}`;
+    } else {
+      // Levels 25-30: Expert (very high food targets, very fast)
+      foodTarget = 29 + (i - 24) * 2;
+      speed = 55 - (i - 25) * 2; // 55ms to 45ms
+      difficulty = 'expert';
+      title = `Master ${i}`;
+    }
+    
+    levels.push({
+      id: `snake_level_${i}`,
+      gameId: 'snake_master',
+      levelNumber: i,
+      title: title,
+      difficulty,
+      description: `Eat ${foodTarget} food items - ${difficulty.toUpperCase()}`,
+      unlocked: i === 1,
+      completed: false,
+      bestScore: 0,
+      stars: 0,
+      timeLimit: 0, // No time limit for snake
+      gameData: {
+        foodTarget,
+        speed,
+      },
+    });
+  }
+  
+  return levels;
+}
+
+export const SNAKE_LEVELS: MiniGameLevel[] = generateSnakeLevels();
+
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -271,6 +350,7 @@ export const getStoryChapters = (): StoryChapter[] => {
 export const getMiniGameLevels = (gameId: string): MiniGameLevel[] => {
   if (gameId === 'memory_master') return MEMORY_LEVELS;
   if (gameId === 'carrom_master') return CARROM_LEVELS;
+  if (gameId === 'snake_master') return SNAKE_LEVELS;
   return [];
 };
 

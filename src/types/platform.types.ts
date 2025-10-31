@@ -3,7 +3,7 @@
  * Defines structure for multi-game platform
  */
 
-export type GameType = 'story' | 'puzzle' | 'memory' | 'sequence' | 'casual';
+export type GameType = 'story' | 'puzzle' | 'memory' | 'sequence' | 'casual' | 'arcade';
 
 export type GameCategory = 'featured' | 'story' | 'minigame' | 'arcade';
 

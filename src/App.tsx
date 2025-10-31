@@ -12,6 +12,7 @@ import { GameLibrary } from './components/platform/GameLibrary';
 import { LevelSelection } from './components/platform/LevelSelection';
 import { MemoryMatchGame } from './components/game/MemoryMatchGame';
 import { CarromGame } from './components/game/CarromGame';
+import { SnakeGame } from './components/game/SnakeGame';
 import { SettingsMenu } from './components/scenes/SettingsMenu';
 import { CreditsScene } from './components/scenes/CreditsScene';
 import {
@@ -46,7 +47,7 @@ function App() {
     games: {},
     totalPlayTime: 0,
     achievements: [],
-    unlockedGames: ['memory_master', 'carrom_master'],
+    unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
   });
 
   // Settings
@@ -77,7 +78,7 @@ function App() {
           games: {},
           totalPlayTime: 0,
           achievements: [],
-          unlockedGames: ['memory_master', 'carrom_master'],
+          unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
         });
       }
     } catch (error) {
@@ -260,7 +261,7 @@ function App() {
       games: {},
       totalPlayTime: 0,
       achievements: [],
-      unlockedGames: ['memory_master', 'carrom_master'],
+      unlockedGames: ['memory_master', 'carrom_master', 'snake_master'],
     });
     setCurrentScene('home');
   };
@@ -360,6 +361,29 @@ function App() {
         <CarromGame
           targetScore={targetScore}
           timeLimit={level.timeLimit}
+          difficulty={level.difficulty}
+          onComplete={(score, stars) => handleGameComplete(score, stars)}
+          onBack={() => {
+            playSFX(SOUND_EFFECTS.CLICK);
+            setCurrentScene('levelSelect');
+          }}
+        />
+      );
+    }
+
+    // Snake game
+    if (game.gameType === 'arcade' && selectedLevelId) {
+      const level = miniGameLevels.find(lv => lv.id === selectedLevelId);
+      if (!level) return <div>Level not found</div>;
+
+      // Get food target and speed from level gameData
+      const foodTarget = level.gameData?.foodTarget || 10;
+      const speed = level.gameData?.speed || 150;
+
+      return (
+        <SnakeGame
+          foodTarget={foodTarget}
+          speed={speed}
           difficulty={level.difficulty}
           onComplete={(score, stars) => handleGameComplete(score, stars)}
           onBack={() => {
